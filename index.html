@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <form name="formHenkan">
+        URLを入れてね<br>
+        <textarea type="text" style="width: 100%;" name="inputTextBox" onKeyUp="execButtonClick()"
+            onChange="execButtonClick()">http://example.com/あいうえお/ｱｲｳｴｵ/dataNo?=指示-依頼-j3x1105</textarea>
+
+        <hr>
+        デコード<br>
+        <textarea type="text" style="width: 100%;" name="decodeTextBox" value=""></textarea>
+
+        <hr>
+        Shift-JISに変換<br>
+        <textarea type="text" style="width: 100%;" name="sjisAsciiTextBox" value=""></textarea>
+
+        UTF8に変換<br>
+        <textarea type="text" style="width: 100%;" name="utf8AsciiTextBox" value=""></textarea>
+
+        <hr>
+        複合変換<br>
+        <textarea type="text" style="width: 100%;" name="multiAsciiTextBox" value=""></textarea>
+
+    </form>
+
+    <script type="text/javascript" src="./ecl.js"></script>
+    <script>
+
+        //テキストボックスの文字を取得する
+        function execButtonClick() {
+            
+            console.clear
+
+            //テキストボックス初期化
+            document.formHenkan.decodeTextBox.value = "";
+            document.formHenkan.sjisAsciiTextBox.value = "";
+            document.formHenkan.utf8AsciiTextBox.value = "";
+
+
+            // var str1 = document.formHenkan.inputTextBox.value;
+
+            // 文字取得
+            // URLはデコードしておく
+            var decStr = UnescapeAutoDetect(document.formHenkan.inputTextBox.value);
+
+            //テキストボックスに格納する
+            // デコード文字
+            document.formHenkan.decodeTextBox.value = decStr;
+
+            // sjis
+            var sjisStr = EscapeSJIS(decStr);
+            sjisStr = UnescapeUrlAscii(sjisStr)
+            document.formHenkan.sjisAsciiTextBox.value = sjisStr;
+
+
+            // utf8
+            var utf8Str = EscapeUTF8(decStr);
+            utf8Str = UnescapeUrlAscii(utf8Str);
+            document.formHenkan.utf8AsciiTextBox.value = utf8Str;
+
+
+
+            //UTF8とSJIS混在URLの複合変換処理
+            var splitStr = 'dataNo?='
+            var splitStrCount = splitStr.length
+
+
+            var utf8LSrt = decStr.substring(0, decStr.indexOf(splitStr)+splitStrCount);
+            var sjisRSrt = decStr.substring(decStr.indexOf(splitStr)+splitStrCount, decStr.length);
+
+            console.log(decStr)
+            console.log(utf8LSrt)
+            console.log(sjisRSrt)
+
+            utf8LSrt = EscapeUTF8(utf8LSrt);
+            utf8LSrt = UnescapeUrlAscii(utf8LSrt);
+
+            sjisRSrt = EscapeSJIS(sjisRSrt);
+            sjisRSrt = UnescapeUrlAscii(sjisRSrt);
+
+            document.formHenkan.multiAsciiTextBox.value = utf8LSrt + sjisRSrt;
+        };
+
+
+
+        //自動判別機能付きUnescape
+        UnescapeAutoDetect = function (str) {
+            return window["Unescape" + GetEscapeCodeType(str)](str);
+        };
+
+
+
+        // URLに通常使うアスキー文字の個別デコード処理
+        // 必要に応じて使用する
+        UnescapeUrlAscii = function (str) {
+
+            for (var j = 0; j < str.length; j++) {
+                // str = str.replace("%20", " ");
+                // str = str.replace("%21", "!");
+                // str = str.replace("%22", '"');
+                // str = str.replace("%23", "#");
+                // str = str.replace("%24", "$");
+                // str = str.replace("%25", "%");
+                // str = str.replace("%26", "&");
+                // str = str.replace("%27", "'");
+                // str = str.replace("%28", "(");
+                // str = str.replace("%29", ")");
+                // str = str.replace("%2A", "*");
+                // str = str.replace("%2B", "+");
+                // str = str.replace("%2C", ",");
+                // str = str.replace("%2D", "-");
+                // str = str.replace("%2E", ".");
+                str = str.replace("%2F", "/");
+                str = str.replace("%3A", ":");
+                // str = str.replace("%3B", ";");
+                // str = str.replace("%3C", "<");
+                str = str.replace("%3D", "=");
+                // str = str.replace("%3E", ">");
+                str = str.replace("%3F", "?");
+                // str = str.replace("%40", "@");
+                // str = str.replace("%5B", "[");
+                // str = str.replace("%5D", "]");
+                // str = str.replace("%5E", "^");
+                // str = str.replace("%5F", "_");
+                // str = str.replace("%60", "`");
+                // str = str.replace("%7B", "{");
+                // str = str.replace("%7C", "|");
+                // str = str.replace("%7D", "}");
+                // str = str.replace("%7E", "~");
+            }
+            return str;
+        };
+
+    </script>
+</body>
+
+</html>
