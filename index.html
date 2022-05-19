@@ -12,22 +12,26 @@
     <form name="formHenkan">
         URLを入れてね<br>
         <textarea type="text" style="width: 100%;" name="inputTextBox" onKeyUp="execButtonClick()"
-            onChange="execButtonClick()">http://example.com/あいうえお/ｱｲｳｴｵ/dataNo?=指示-依頼-j3x1105</textarea>
+            onChange="execButtonClick()"
+            onfocus="this.select();">http://example.com/あいうえお/ｱｲｳｴｵ/dataNo?=指示-依頼-j3x1105</textarea>
 
         <hr>
         デコード<br>
-        <textarea type="text" style="width: 100%;" name="decodeTextBox" value=""></textarea>
+        <textarea type="text" style="width: 100%;" name="decodeTextBox" value="" onfocus="this.select();"></textarea>
 
         <hr>
         Shift-JISに変換<br>
-        <textarea type="text" style="width: 100%;" name="sjisAsciiTextBox" value=""></textarea>
+        <textarea type="text" style="width: 100%;" name="sjisAsciiTextBox" value="" onfocus="this.select();"></textarea>
 
         UTF8に変換<br>
-        <textarea type="text" style="width: 100%;" name="utf8AsciiTextBox" value=""></textarea>
+        <textarea type="text" style="width: 100%;" name="utf8AsciiTextBox" value="" onfocus="this.select();"></textarea>
 
         <hr>
         複合変換<br>
-        <textarea type="text" style="width: 100%;" name="multiAsciiTextBox" value=""></textarea>
+        <textarea type="text" style="width: 100%;" name="multiAsciiTextBox" value=""
+            onfocus="this.select();"></textarea><br>
+
+        <a href="https://google.com" target="_blank" id="multiAsciiLink">aaaaa</a>
 
     </form>
 
@@ -36,7 +40,7 @@
 
         //テキストボックスの文字を取得する
         function execButtonClick() {
-            
+
             console.clear
 
             //テキストボックス初期化
@@ -45,11 +49,21 @@
             document.formHenkan.utf8AsciiTextBox.value = "";
 
 
-            // var str1 = document.formHenkan.inputTextBox.value;
+            //デコード用に文字分解
+            //UTF8とSJIS混在URLの複合変換処理
+            var splitStr = 'dataNo?='
+            var splitStrCount = splitStr.length
 
             // 文字取得
-            // URLはデコードしておく
-            var decStr = UnescapeAutoDetect(document.formHenkan.inputTextBox.value);
+            var decStr = document.formHenkan.inputTextBox.value;
+
+            //スプリット文字で分解しておく
+            var decStr1 = decStr.substring(0, decStr.indexOf(splitStr) + splitStrCount);
+            var decStr2 = decStr.substring(decStr.indexOf(splitStr) + splitStrCount, decStr.length);
+
+            //デコード
+            decStr = UnescapeAutoDetect(decStr1) + UnescapeAutoDetect(decStr2);
+
 
             //テキストボックスに格納する
             // デコード文字
@@ -67,14 +81,8 @@
             document.formHenkan.utf8AsciiTextBox.value = utf8Str;
 
 
-
-            //UTF8とSJIS混在URLの複合変換処理
-            var splitStr = 'dataNo?='
-            var splitStrCount = splitStr.length
-
-
-            var utf8LSrt = decStr.substring(0, decStr.indexOf(splitStr)+splitStrCount);
-            var sjisRSrt = decStr.substring(decStr.indexOf(splitStr)+splitStrCount, decStr.length);
+            var utf8LSrt = decStr.substring(0, decStr.indexOf(splitStr) + splitStrCount);
+            var sjisRSrt = decStr.substring(decStr.indexOf(splitStr) + splitStrCount, decStr.length);
 
             console.log(decStr)
             console.log(utf8LSrt)
@@ -87,6 +95,13 @@
             sjisRSrt = UnescapeUrlAscii(sjisRSrt);
 
             document.formHenkan.multiAsciiTextBox.value = utf8LSrt + sjisRSrt;
+
+
+            //ハイパーリンクを作成する処理
+            var target = document.getElementById("multiAsciiLink");
+            target.href = document.formHenkan.multiAsciiTextBox.value;
+            target.textContent = decStr2;
+
         };
 
 
